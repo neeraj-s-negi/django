@@ -15,36 +15,35 @@ class Student(models.Model):
 
 ####################################################################################################################
                                        #Abstract_User  MODEL
+class CustomUser(AbstractUser):
+    username = None
+    email = models.EmailField(unique=True)
 
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = [ ]
+    
+    objects = CustomUserManager()    
 
-# class CustomUser(AbstractUser):
-#     username = None
-#     email = models.EmailField(unique=True)
-
-#     USERNAME_FIELD = "email"
-#     REQUIRED_FIELDS = [ ]
-#     objects = CustomUserManager()    
-
-#     def __str__(self):
-#         return self.email
+    def __str__(self):
+        return self.email
     
 
 ####################################################################################################################
                                        #Abstract_Base_User  MODEL
 
 
-class CustomUser(AbstractBaseUser, PermissionsMixin):
-    email = models.EmailField(unique=True)
-    first_name = models.CharField(max_length=30, blank=True)
-    last_name = models.CharField(max_length=30, blank=True)
-    is_active = models.BooleanField(default=True)
-    is_staff = models.BooleanField(default=False)
-    date_joined = models.DateTimeField(auto_now_add=True)
+# class CustomUser(AbstractBaseUser, PermissionsMixin):
+#     email = models.EmailField(unique=True)
+#     first_name = models.CharField(max_length=30, blank=True)
+#     last_name = models.CharField(max_length=30, blank=True)
+#     is_active = models.BooleanField(default=True)
+#     is_staff = models.BooleanField(default=False)
+#     date_joined = models.DateTimeField(auto_now_add=True)
 
-    objects = CustomUserManager()
+#     objects = CustomUserManager()
 
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = []
+#     USERNAME_FIELD = 'email'
+#     REQUIRED_FIELDS = []
 
-    def __str__(self):
-        return self.email
+#     def __str__(self):
+#         return self.email

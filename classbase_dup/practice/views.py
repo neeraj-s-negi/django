@@ -2,15 +2,16 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from rest_framework.views import APIView
 from rest_framework import status
-from .models import Student
-from .serializers import StudentSerializer
+from .models import Student,CustomUser
+from .serializers import StudentSerializer, MyTokenObtainPairSerializer, RegisterSerializer
 from rest_framework.response import Response
 from rest_framework import mixins, generics
 from rest_framework.viewsets import ModelViewSet
 from .pagination import MyLimitOffsetPagination
+
 ########################### TOKEN AUTHENTICATION #############################
 from rest_framework.authentication import TokenAuthentication, BasicAuthentication
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 
 ########################### JWT AUTHENTICATION #############################
 
@@ -18,10 +19,14 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from rest_framework.decorators import api_view        # function base drf
 
-
+from rest_framework_simplejwt.views import TokenObtainPairView
 
 
 # Create your views here.
+
+class MyObtainTokenPairView(TokenObtainPairView):
+    permission_classes = [AllowAny]
+    serializer_class = MyTokenObtainPairSerializer
 
 ###############################################################################################
 
@@ -31,6 +36,7 @@ from rest_framework.decorators import api_view        # function base drf
 class StudentClassBaseView(APIView):
 
     # authentication_classes = [TokenAuthentication]
+
     # authentication_classes = [JWTAuthentication]
     # permission_classes = [IsAuthenticated]
     # pagination_class =MyLimitOffsetPagination
@@ -43,8 +49,10 @@ class StudentClassBaseView(APIView):
                 serializer=StudentSerializer(data)
                 return Response(serializer.data)
         except Student.DoesNotExist:
-            data = Student.objects.all()                                 #.order_by('-id') - for serial order who create latest
+            data = Student.objects.all()      
+                                       #.order_by('-id') - for serial order who create latest
             serializer = StudentSerializer(data, many=True)
+            print(serializer.data)
             return Response(serializer.data)  
 
 
@@ -130,8 +138,23 @@ class StudentMixinBaseView(mixins.ListModelMixin, mixins.CreateModelMixin, mixin
 
 class StudentGenericBaseView(generics.ListCreateAPIView,generics.RetrieveUpdateDestroyAPIView,generics.RetrieveAPIView):
     queryset = Student.objects.all()
+
     serializer_class = StudentSerializer
     pagination_class =MyLimitOffsetPagination
+
+
+class RegisterView(generics.ListCreateAPIView):
+    """Handles creating and listing Users."""
+    queryset = CustomUser.objects.all()
+
+    def create(self, request, *args, **kwargs):
+        data = request.data
+        serializer = RegisterSerializer(data=data)
+        if serializer.is_valid():
+            self.perform_create(serializer)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+  
 
 ###############################################################################################
 

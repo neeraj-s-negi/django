@@ -1,18 +1,24 @@
 from django.contrib import admin
 from django.urls import path, include
 from . import views
+from django.conf import settings
+from django.conf.urls.static import static
 from .views import StudentClassBaseView, StudentMixinBaseView, StudentGenericBaseView, StudentViewSet
 from rest_framework.routers import DefaultRouter              # model view set
 
 from rest_framework.authtoken.views import obtain_auth_token              # Token Authentication
 
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView          # jwt token
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView         # jwt token
+
 
 router = DefaultRouter()                            # model view set
 router.register('studentapi', views.StudentViewSet, basename='student')            # model view set
 
-urlpatterns = [
+# router.register(r'product', ProductViewSet, basename='Product')
+# router.register(r'image', ImageViewSet, basename= 'Image')
 
+urlpatterns = [
+    path('register/', views.RegisterView.as_view(), name='register'),
     ##################################################################################
                                 # API View   CLASS BASE VIEW URL_PATH
 
@@ -37,10 +43,11 @@ urlpatterns = [
                                 #    GENERIC BASE VIEW URL_PATH
 
     path('list_generics/', views.StudentGenericBaseView.as_view()),
-    # path('post_generics/', views.StudentGenericBaseView.as_view()),
+    path('post_generics/', views.StudentGenericBaseView.as_view()),
     # path('delete_generics/<int:pk>/', views.StudentGenericBaseView.as_view()),
     # path('put_generics/<int:pk>/', views.StudentGenericBaseView.as_view()),
     # path('get_generics/<int:pk>/', views.StudentGenericBaseView.as_view()),
+
 
 
     ##################################################################################
@@ -59,6 +66,10 @@ urlpatterns = [
     
     path('api/jwt_token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/jwt_token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    
+
+    # path('login/', MyObtainTokenPairView.as_view(), name='token_obtain_pair'),
+    # path('login/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 
 
     ####################################################################################################################################
@@ -71,3 +82,7 @@ urlpatterns = [
     path('update/<int:id>/',views.update),
     path('partial_update/<int:id>/',views.partial_update),
 ]
+
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

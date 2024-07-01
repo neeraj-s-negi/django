@@ -3,7 +3,8 @@ from django.http import HttpResponse
 from rest_framework.views import APIView
 from rest_framework import status
 from .models import Student,CustomUser
-from .serializers import StudentSerializer, MyTokenObtainPairSerializer, RegisterSerializer
+from .serializers import StudentSerializer, MyTokenObtainPairSerializer, RegisterSerializer, LoginSerializer
+from django.contrib.auth import login
 from rest_framework.response import Response
 from rest_framework import mixins, generics
 from rest_framework.viewsets import ModelViewSet
@@ -154,8 +155,28 @@ class RegisterView(generics.ListCreateAPIView):
             self.perform_create(serializer)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-  
+    
 
+class LoginView(APIView):
+    def post(self, request):
+        serializer = LoginSerializer(data=request.data)
+        if serializer.is_valid():
+            all_data = serializer.validated_data['user']
+            login(request, all_data)
+            user_serializer = RegisterSerializer(all_data)
+            # return Response({'detail': 'Successfully logged in.'}, status=status.HTTP_200_OK)
+            return Response({'detail': 'Successfully logged in.', 'data': user_serializer.data}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+class LogoutView(APIView):
+    permission_classes = [IsAuthenticated]
+    def post(self, request):
+        logout(request)
+        return Response({'msg': 'Success Logout'})
+
+
+
+    
 ###############################################################################################
 
                              # MODEL VIEW SET

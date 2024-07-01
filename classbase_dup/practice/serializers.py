@@ -67,6 +67,29 @@ class RegisterSerializer(serializers.ModelSerializer):
 
 
 
+class LoginSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True)
+
+    def validate(self, data):
+        email = data.get('email')
+        password = data.get('password')
+
+        if email and password:
+            user = authenticate(email=email, password=password)
+            if user:
+                if user.is_active:
+                    data['user'] = user
+                else:
+                    raise serializers.ValidationError('User is deactivated.')
+            else:
+                raise serializers.ValidationError('Invalid credentials.')
+        else:
+            raise serializers.ValidationError('Must provide both email and password.')
+
+        return data
+
+
 
 # class CustomStudentSerializer(serializers.ModelSerializer):
 #     class Meta:
